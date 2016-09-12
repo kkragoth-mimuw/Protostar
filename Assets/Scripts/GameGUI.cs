@@ -9,14 +9,19 @@ public class GameGUI : MonoBehaviour
     public GameObject GUIPanel;
     public GameObject InfoPanel;
 
+    public Text text;
+
     /* Private variables */
     private GameController gameController;
     private PlayerController playerController;
     private GameObject player;
 
     private bool hasGameEnded;
-    private bool isGamePaused;
+    private bool isGamePaused = false;
 
+    public GameObject missile;
+
+    private float time = 0.0f;
 
     /* Methods */
     void Start()
@@ -46,22 +51,44 @@ public class GameGUI : MonoBehaviour
     private void HandleJoystick()
     {
         Vector3 movement = new Vector3(
+            CnInputManager.GetAxis("Horizontal"),
             0f,
-            0f,
-            CnInputManager.GetAxis("Vertical"));
+            CnInputManager.GetAxis("Vertical")
+            );
 
-        Vector3 rotation = new Vector3(-90.0f * CnInputManager.GetAxis("Mouse Y"), 180.0f * CnInputManager.GetAxis("Mouse X"),
-            -180.0f *CnInputManager.GetAxis("Horizontal"));
+        Vector3 rotation = new Vector3(0,
+            Mathf.Atan2(CnInputManager.GetAxis("Mouse X"),
+                CnInputManager.GetAxis("Mouse Y")
+            ) * Mathf.Rad2Deg,
+            0);
 
-        Debug.Log(rotation);
-
-        player.transform.Rotate(rotation * Time.deltaTime); //.rotation += 20 * rotation;
+        //player.transform.Rotate(rotation * Time.deltaTime); //.rotation += 20 * rotation;
         //player.transform.localEulerAngles = rotation;
+        player.transform.rotation = Quaternion.Euler(rotation);
 
+        text.text =  rotation.y.ToString();
+        //text.text((String) rotation.y);
         //player.transform.position += 2.5f * movement * player.transform.forward;
-        player.transform.position += movement.z * transform.forward;
-        player.transform.position += movement.x * transform.right;
-
+        //player.transform.position += movement.y * transform.forward;
+        //player.transform.position += movement.x * transform.right;
+        player.transform.position += 5.5f * movement;
+    
+       
+        if (time >= 0.15f)
+        {
+            if ((CnInputManager.GetAxis("Mouse X") != 0) || (CnInputManager.GetAxis("Mouse Y") != 0))
+            {
+                GameObject firedMissile;
+                firedMissile = Instantiate(missile, player.transform.position, player.transform.rotation) as GameObject;
+                firedMissile.GetComponent<Missile>().fire();
+                isGamePaused = true;
+                time = 0.0f;
+            }
+        }
+        else
+        {
+            time += Time.deltaTime;
+        }
 
         //Debug.Log(movement);
     }
