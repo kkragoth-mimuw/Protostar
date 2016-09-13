@@ -17,6 +17,7 @@ public class Missile : MonoBehaviour
     {
         sounds = GetComponentsInChildren<AudioSource>();
     }
+
     public void fire()
     {
         //GetComponent<Rigidbody>().detectCollisions = false;
@@ -50,6 +51,9 @@ public class Missile : MonoBehaviour
         if (other.gameObject == owner) {
             return;
         }
+
+        if (other.gameObject.tag == Tags.BORDER)
+            return;
 
         Destroy(other.gameObject);
         Destroy(this.gameObject);

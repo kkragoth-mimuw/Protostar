@@ -8,6 +8,8 @@ TagManager:
   - Enemy
   - WaveCompleted
   - Gui
+  - Border
+  - Spawner
   layers:
   - Default
   - TransparentFX

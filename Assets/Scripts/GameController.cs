@@ -24,8 +24,6 @@ public class GameController : MonoBehaviour
     public Wave[] waves;
     public float waveCountdown;
     private float searchCountdown = 1f;
-    public Transform[] spawnPoints;
-
 
     /* Private variables */
     private SpawnState state = SpawnState.COUNTING;
@@ -33,6 +31,9 @@ public class GameController : MonoBehaviour
     private GameObject eventSystem;
     private GameGUI gui;
 
+    private GameObject[] spawnPoints;
+
+    private int waveMultipler = 1;
     private int nextWave = 0;
 
     private int score;
@@ -43,64 +44,91 @@ public class GameController : MonoBehaviour
     /* Methods */
     void Start()
     {
-        waveCountdown = timeBetweenWaves;
-        gui = GameObject.FindGameObjectWithTag("Gui").GetComponent<GameGUI>();
+        gameState = GameState.NotStarted;
+
+        gui = GameObject.FindGameObjectWithTag(Tags.GUI).GetComponent<GameGUI>();
+        gui.ShowMenuPanel();
+        spawnPoints = GameObject.FindGameObjectsWithTag(Tags.SPAWNER);
+
+        Time.timeScale = 0.0f;
     }
 	
+    public void StartGame()
+    {
+        gameState = GameState.Playing;
+        waveCountdown = timeBetweenWaves;
+        Time.timeScale = 1.0f;
+
+        // Spawn Player
+    }
+
+    public void PauseGame()
+    {
+        gameState = GameState.Paused;
+        Time.timeScale = 0.0f;
+    }
+
+
     void Update()
     {
-        if (state == SpawnState.WAITING)
+        if (gameState == GameState.Playing)
         {
-            if (!EnemyIsAlive())
+            if (state == SpawnState.WAITING)
             {
-                // Begin new wave;
-                WaveCompleted();
+                if (!EnemyIsAlive())
+                {
+                    // Begin new wave;
+                    WaveCompleted();
+
+                }
+                else
+                {
+                    return;
+                }
+            }
+
+            if (waveCountdown <= 0)
+            {
+                if (state != SpawnState.SPAWNING)
+                {
+                    StartCoroutine(SpawnWave(waves[nextWave]));
+                }
 
             }
             else
             {
-                return;
+                waveCountdown -= Time.deltaTime;
+                gui.SetNextWaveInText((waveCountdown >= 0) ? waveCountdown : 0);
             }
-        }
-
-        if (waveCountdown <= 0)
-        {
-            if (state != SpawnState.SPAWNING)
-            {
-                StartCoroutine(SpawnWave(waves[nextWave]));
-            }
-
-        }
-        else
-        {
-            waveCountdown -= Time.deltaTime;
-            gui.SetNextWaveInText((waveCountdown >= 0) ? waveCountdown : 0);
         }
     }
 
-    IEnumerator SpawnWave(Wave _wave)
+    IEnumerator SpawnWave(Wave wave)
     {
         gui.SetNextWaveInVisible(false);
-        gui.SetWaveStatusText("enemies spawning...");
+        gui.SetWaveStatusText("fight!");
+        gui.AdvanceWaveCount();
 
         state = SpawnState.SPAWNING;
         
-        for (int i = 0; i <_wave.count; i++)
+        for (int i = 0; i < waveMultipler * wave.count; i++)
         {
-            SpawnEnemy(_wave.enemy);
-            yield return new WaitForSeconds(1f / _wave.rate);
+            SpawnEnemy(wave.enemy);
+            yield return new WaitForSeconds(1f / wave.rate);
+
+            gui.SetWaveCompletedVisible(false);
         }
 
         state = SpawnState.WAITING;
 
-        gui.SetWaveCompletedVisible(false);
+
         yield break;
     }
 
     void SpawnEnemy(Transform _enemy)
     {
-        Transform sp = spawnPoints[Random.Range(0, spawnPoints.Length)];
-        Instantiate(_enemy, sp.position, sp.rotation);
+        Transform sp = spawnPoints[Random.Range(0, spawnPoints.Length)].transform;
+        GameObject go = Instantiate(_enemy, sp.position, sp.rotation) as GameObject;
     }
 
     bool EnemyIsAlive()
@@ -109,6 +137,7 @@ public class GameController : MonoBehaviour
         if (searchCountdown <= 0f)
         {
             searchCountdown = 1f;
+            Debug.Log(GameObject.FindGameObjectWithTag(Tags.ENEMY));
             return GameObject.FindGameObjectWithTag(Tags.ENEMY) != null;
     
         }
@@ -122,6 +151,7 @@ public class GameController : MonoBehaviour
     {
         gui.SetWaveStatusText("WAVE COMPLETED");
         gui.SetWaveCompletedVisible(true);
+
         state = SpawnState.COUNTING;
         waveCountdown = timeBetweenWaves;
 
@@ -133,7 +163,11 @@ public class GameController : MonoBehaviour
         if (nextWave >= waves.Length)
         {
             nextWave = 0;
+            waveMultipler++;
         }
+
+        AIController.minVelocity += 50;
+        AIController.maxVelocity += 50;
 
     }
 }

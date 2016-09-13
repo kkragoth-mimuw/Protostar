@@ -5,13 +5,13 @@ using CnControls;
 
 public class GameGUI : MonoBehaviour
 {
-    /* Constants */
 
-
-
+    public bool playAudio;
+    public bool swapJoystick;
+    
     /* Public UI objects */
-    public GameObject GUIPanel;
-    public GameObject InfoPanel;
+    public GameObject MenuPanel;
+    public GameObject QuitPrompt;
 
     public Text text;
     public GameObject WaveCompleted;
@@ -20,13 +20,18 @@ public class GameGUI : MonoBehaviour
     public GameObject NextWaveIn;
     public Text NextWaveInText;
 
+    public Text WaveCount;
+
     /* Private variables */
+    private Android android;
+
     private GameController gameController;
     private PlayerController playerController;
     private GameObject player;
 
     private bool hasGameEnded;
     private bool isGamePaused = false;
+    private int waveCount = 0;
 
     public GameObject missile;
 
@@ -35,21 +40,34 @@ public class GameGUI : MonoBehaviour
     /* Methods */
     void Start()
     {
-        //gameController = GameObject.FindGameObjectWithTag(Tags.GAME_CONTROLLER).GetComponent<GameController>();
+        playAudio = true;
+        swapJoystick = false;
+        gameController = GameObject.FindGameObjectWithTag(Tags.GAME_CONTROLLER).GetComponent<GameController>();
         //playerController = GameObject.FindGameObjectWithTag(Tags.PLAYER).GetComponent<PlayerController>();
-        player = GameObject.FindGameObjectWithTag("Player");
+        player = GameObject.FindGameObjectWithTag(Tags.PLAYER);
     }
 	
     void Update()
     {
-        HandleJoystick();
+        if (!MenuPanel.active)
+            HandleJoystick();
+    }
+
+    public void ResetWaveCount()
+    {
+        waveCount = 0;
+        WaveCount.text = "WAVE: " + waveCount.ToString();
+    }
+
+    public void AdvanceWaveCount()
+    {
+        waveCount++;
+        WaveCount.text = "WAVE: " + waveCount.ToString();
     }
 
     public void SetWaveCompletedVisible(bool visible)
     {
-        //WaveCompleted.enabled = visible;
         WaveCompleted.SetActive(visible);
-        //Debug.Log(visible)
     }
 
     public void SetWaveStatusText(string status)
@@ -128,8 +146,63 @@ public class GameGUI : MonoBehaviour
         
     }
 
+    public void Play()
+    {
+        CloseMenuPanel();
+        gameController.StartGame();
+    }
 
+    public void PauseMenu()
+    {
+        ShowMenuPanel();
+        gameController.PauseGame();
+    }
 
-        
+    public void Exit()
+    {
+        #if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+        #else
+        Application.Quit();
+        #endif
+    }
+
+    public void ShowQuitPrompt()
+    {
+        QuitPrompt.SetActive(true);
+    }
+
+    public void CloseQuitPrompt()
+    {
+        QuitPrompt.SetActive(false);
+    }
+
+    public void ShowMenuPanel()
+    {
+        MenuPanel.SetActive(true);
+    }
+
+    public void CloseMenuPanel()
+    {
+        MenuPanel.SetActive(false);
+    }
+
+    public void AudioChanged(bool isclick)
+    {
+        if (isclick)
+        {
+            GetComponent<AudioSource>().volume = 1.0f;
+        }
+        else
+        {
+            GetComponent<AudioSource>().volume = 0.0f;
+        }
+
+    }
+
+    public void SwapJoystickChanged(bool isclick)
+    {
+        swapJoystick = isclick;
+    }
 }
 
