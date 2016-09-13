@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class WaveSpawner : MonoBehaviour
+public class Pickup : MonoBehaviour
 {
 
     // Use this for initialization

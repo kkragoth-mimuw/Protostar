@@ -5,11 +5,20 @@ using CnControls;
 
 public class GameGUI : MonoBehaviour
 {
+    /* Constants */
+
+
+
     /* Public UI objects */
     public GameObject GUIPanel;
     public GameObject InfoPanel;
 
     public Text text;
+    public GameObject WaveCompleted;
+    public Text WaveCompletedText;
+
+    public GameObject NextWaveIn;
+    public Text NextWaveInText;
 
     /* Private variables */
     private GameController gameController;
@@ -36,6 +45,27 @@ public class GameGUI : MonoBehaviour
         HandleJoystick();
     }
 
+    public void SetWaveCompletedVisible(bool visible)
+    {
+        //WaveCompleted.enabled = visible;
+        WaveCompleted.SetActive(visible);
+        //Debug.Log(visible)
+    }
+
+    public void SetWaveStatusText(string status)
+    {
+        WaveCompletedText.text = status;
+    }
+
+    public void SetNextWaveInVisible(bool visible)
+    {
+        NextWaveIn.SetActive(visible);
+    }
+
+    public void SetNextWaveInText(float time)
+    {
+        NextWaveInText.text = "next wave in: " + time.ToString("#.00");
+    }
     /* Private methods */
 
     private void StopTime()
@@ -66,7 +96,7 @@ public class GameGUI : MonoBehaviour
         //player.transform.localEulerAngles = rotation;
         player.transform.rotation = Quaternion.Euler(rotation);
 
-        text.text =  rotation.y.ToString();
+        //text.text =  rotation.y.ToString();
         //text.text((String) rotation.y);
         //player.transform.position += 2.5f * movement * player.transform.forward;
         //player.transform.position += movement.y * transform.forward;
