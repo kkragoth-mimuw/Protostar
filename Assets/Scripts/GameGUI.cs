@@ -71,7 +71,7 @@ public class GameGUI : MonoBehaviour
         //player.transform.position += 2.5f * movement * player.transform.forward;
         //player.transform.position += movement.y * transform.forward;
         //player.transform.position += movement.x * transform.right;
-        player.transform.position += 5.5f * movement;
+        player.transform.position += 7.5f * movement;
     
        
         if (time >= 0.15f)
@@ -80,7 +80,7 @@ public class GameGUI : MonoBehaviour
             {
                 GameObject firedMissile;
                 firedMissile = Instantiate(missile, player.transform.position, player.transform.rotation) as GameObject;
-                firedMissile.GetComponent<Missile>().fire();
+                firedMissile.GetComponent<Missile>().fire(player);
                 isGamePaused = true;
                 time = 0.0f;
             }

@@ -6,15 +6,32 @@ public class Missile : MonoBehaviour
 
     private float force = 1000.0f;
     private float damage = 50.0f;
-    private float lifeSpan = 1.5f;
+    private float lifeSpan = 0.9f;
 
     private GameObject owner;
 
+    private AudioSource[] sounds;
+
+
+    public void Start()
+    {
+        sounds = GetComponentsInChildren<AudioSource>();
+    }
     public void fire()
     {
         //GetComponent<Rigidbody>().detectCollisions = false;
         //GetComponent<Rigidbody>().AddForce(new Vector3(0, 0, 1) * force);
         GetComponent<Rigidbody>().AddForce(transform.forward * force, ForceMode.Impulse);
+        sounds[0].Play();
+        //Debug.Log(transform.forward);
+    }
+
+    public void fire(GameObject owner)
+    {
+        //GetComponent<Rigidbody>().detectCollisions = false;
+        //GetComponent<Rigidbody>().AddForce(new Vector3(0, 0, 1) * force);
+        GetComponent<Rigidbody>().AddForce(transform.forward * force, ForceMode.Impulse);
+        this.owner = owner;
         //Debug.Log(transform.forward);
     }
 	
@@ -30,7 +47,12 @@ public class Missile : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Kolizja");
+        if (other.gameObject == owner) {
+            return;
+        }
+
+        Destroy(other.gameObject);
+        Destroy(this.gameObject);
     }
 }
 
