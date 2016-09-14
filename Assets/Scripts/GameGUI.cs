@@ -6,16 +6,20 @@ using CnControls;
 public class GameGUI : MonoBehaviour
 {
 
+    public bool gameRunning = false;
     public bool playAudio;
     public bool swapJoystick;
     
     /* Public UI objects */
     public GameObject MenuPanel;
     public GameObject QuitPrompt;
+    public GameObject GameOverPanel;
 
     public Text text;
     public GameObject WaveCompleted;
     public Text WaveCompletedText;
+    public Text PlayResume;
+    public Text GameOverText;
 
     public GameObject NextWaveIn;
     public Text NextWaveInText;
@@ -23,6 +27,12 @@ public class GameGUI : MonoBehaviour
     public Text WaveCount;
 
     /* Private variables */
+
+    private string movementAxisX = Tags.H; //"Horizontal";
+    private string movementAxisY = Tags.V; //"Vertical";
+    private string fireAxisX = Tags.MX; //"Mouse X";
+    private string fireAxisY = Tags.MY; //"Mouse Y";
+
     private Android android;
 
     private GameController gameController;
@@ -98,47 +108,34 @@ public class GameGUI : MonoBehaviour
 
     private void HandleJoystick()
     {
+        
         Vector3 movement = new Vector3(
-            CnInputManager.GetAxis("Horizontal"),
+            CnInputManager.GetAxis(movementAxisX),
             0f,
-            CnInputManager.GetAxis("Vertical")
-            );
+            CnInputManager.GetAxis(movementAxisY)
+        );
 
         Vector3 rotation = new Vector3(0,
-            Mathf.Atan2(CnInputManager.GetAxis("Mouse X"),
-                CnInputManager.GetAxis("Mouse Y")
+            Mathf.Atan2(CnInputManager.GetAxis(fireAxisX),
+                CnInputManager.GetAxis(fireAxisY)
             ) * Mathf.Rad2Deg,
-            0);
+            0
+        );
 
-        //player.transform.Rotate(rotation * Time.deltaTime); //.rotation += 20 * rotation;
-        //player.transform.localEulerAngles = rotation;
-        player.transform.rotation = Quaternion.Euler(rotation);
+        if (player == null)
+        {
+            player = GameObject.FindGameObjectWithTag(Tags.PLAYER);
+            return;
+        }
 
-        //text.text =  rotation.y.ToString();
-        //text.text((String) rotation.y);
-        //player.transform.position += 2.5f * movement * player.transform.forward;
-        //player.transform.position += movement.y * transform.forward;
-        //player.transform.position += movement.x * transform.right;
-        player.transform.position += 7.5f * movement;
-    
+        PlayerController pc = player.GetComponent<PlayerController>();
+        pc.Move(movement);
+        pc.Rotate(rotation);
        
-        if (time >= 0.15f)
+        if ((CnInputManager.GetAxis(fireAxisX) != 0) || (CnInputManager.GetAxis(fireAxisY) != 0))
         {
-            if ((CnInputManager.GetAxis("Mouse X") != 0) || (CnInputManager.GetAxis("Mouse Y") != 0))
-            {
-                GameObject firedMissile;
-                firedMissile = Instantiate(missile, player.transform.position, player.transform.rotation) as GameObject;
-                firedMissile.GetComponent<Missile>().fire(player);
-                isGamePaused = true;
-                time = 0.0f;
-            }
+            pc.Shoot();
         }
-        else
-        {
-            time += Time.deltaTime;
-        }
-
-        //Debug.Log(movement);
     }
 
     private void DrawPlayerStats()
@@ -149,7 +146,23 @@ public class GameGUI : MonoBehaviour
     public void Play()
     {
         CloseMenuPanel();
-        gameController.StartGame();
+        if (!gameRunning)
+        {
+            PlayResume.text = "RESUME";
+            gameController.StartGame();
+            WaveCount.text = "WAVE: " + waveCount.ToString(); 
+        }
+
+        gameController.ResumeGame();
+        gameRunning = true;
+    }
+
+    public void Retry()
+    {
+        WaveCount.text = "";
+        GameOverPanel.SetActive(false);
+        gameController.Retry();
+        waveCount = 0;
     }
 
     public void PauseMenu()
@@ -202,7 +215,28 @@ public class GameGUI : MonoBehaviour
 
     public void SwapJoystickChanged(bool isclick)
     {
-        swapJoystick = isclick;
+        if (!isclick)
+        {
+            movementAxisX = Tags.H;  //"Horizontal";
+            movementAxisY = Tags.V;  // "Vertical";
+            fireAxisX = Tags.MX;     // "Mouse X";
+            fireAxisY = Tags.MY;     //"Mouse Y";
+        }
+        else
+        {
+            movementAxisX = Tags.MX;
+            movementAxisY = Tags.MY;
+            fireAxisX = Tags.H;
+            fireAxisY = Tags.V;
+        }
+    }
+
+    public void GameOver()
+    {
+        GameOverText.text = "GAME OVER! \n" +
+            "YOU SURVIVED " + (((waveCount - 1) > 0) ? waveCount - 1 : 0).ToString() + " WAVES";
+        GameOverPanel.SetActive(true);
+        WaveCount.text = "";
     }
 }
 

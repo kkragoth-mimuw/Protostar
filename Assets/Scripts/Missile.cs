@@ -48,11 +48,13 @@ public class Missile : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject == owner) {
-            return;
-        }
 
-        if (other.gameObject.tag == Tags.BORDER)
+        if ((other.gameObject.tag == Tags.PLAYER_SPAWN) ||
+            (other.gameObject.tag == Tags.MISSILE) ||
+            (other.gameObject == owner) ||
+            (other.gameObject.tag == Tags.BORDER) ||
+            (other.gameObject.tag == Tags.DEADLY_BORDER)
+            )
             return;
 
         Destroy(other.gameObject);

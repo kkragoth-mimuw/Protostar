@@ -4,13 +4,14 @@ using System.Collections;
 public class AIController : MonoBehaviour
 {
     
-    public static int minVelocity = 300;
-    public static int maxVelocity = 500;
+    public static int minVelocity = 200;
+    public static int maxVelocity = 300;
 
     private int positionVariation;
     private int velocity;
 
     private GameObject player;
+
     // Use this for initialization
     void Start()
     {
@@ -26,6 +27,12 @@ public class AIController : MonoBehaviour
             + new Vector3(Random.Range(-positionVariation, positionVariation), 0,
                 Random.Range(-50.0f, 50.0f)),
             velocity * Time.deltaTime); 
+    }
+
+    public static void Reset()
+    {
+        minVelocity = 100;
+        maxVelocity = 150;
     }
 }
 

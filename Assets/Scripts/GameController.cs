@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class GameController : MonoBehaviour
 {
@@ -25,12 +26,15 @@ public class GameController : MonoBehaviour
     public float waveCountdown;
     private float searchCountdown = 1f;
 
+    public GameObject player;
+
     /* Private variables */
     private SpawnState state = SpawnState.COUNTING;
     private GameState gameState;
     private GameObject eventSystem;
     private GameGUI gui;
 
+    private GameObject playerSpawnPoint;
     private GameObject[] spawnPoints;
 
     private int waveMultipler = 1;
@@ -48,6 +52,8 @@ public class GameController : MonoBehaviour
 
         gui = GameObject.FindGameObjectWithTag(Tags.GUI).GetComponent<GameGUI>();
         gui.ShowMenuPanel();
+
+        playerSpawnPoint = GameObject.FindGameObjectWithTag(Tags.PLAYER_SPAWN);
         spawnPoints = GameObject.FindGameObjectsWithTag(Tags.SPAWNER);
 
         Time.timeScale = 0.0f;
@@ -59,13 +65,59 @@ public class GameController : MonoBehaviour
         waveCountdown = timeBetweenWaves;
         Time.timeScale = 1.0f;
 
-        // Spawn Player
+        SpawnPlayer();
     }
 
     public void PauseGame()
     {
-        gameState = GameState.Paused;
+        if (gameState != GameState.GameOver)
+            gameState = GameState.Paused;
         Time.timeScale = 0.0f;
+    }
+
+    public void ResumeGame()
+    {
+        if (gameState != GameState.GameOver)
+        {
+            gameState = GameState.Playing;
+            Time.timeScale = 1.0f; 
+        }
+    }
+
+    public void GameOver()
+    {
+        gui.GameOver();
+
+        gameState = GameState.GameOver;
+        Time.timeScale = 0.0f;
+
+        RemoveAllEnemies();
+        RemoveAllMissiles();
+    }
+
+    public void Retry()
+    {
+        gameState = GameState.Playing;
+        waveCountdown = timeBetweenWaves;
+        Time.timeScale = 1.0f;
+        state = SpawnState.COUNTING;
+        SpawnPlayer();
+
+        nextWave = 0;
+        waveMultipler = 1;
+
+        waveCountdown = timeBetweenWaves;
+
+        gui.SetNextWaveInText(waveCountdown);
+        gui.SetNextWaveInVisible(true);
+
+        // Reset Difficulty
+        AIController.Reset();
+    }
+
+    public void SpawnPlayer()
+    {
+        Instantiate(player, playerSpawnPoint.transform.position, playerSpawnPoint.transform.rotation);
     }
 
 
@@ -110,17 +162,26 @@ public class GameController : MonoBehaviour
         gui.AdvanceWaveCount();
 
         state = SpawnState.SPAWNING;
+
+        yield return new WaitForSeconds(0.75f);
+        gui.SetWaveCompletedVisible(false);
         
         for (int i = 0; i < waveMultipler * wave.count; i++)
         {
-            SpawnEnemy(wave.enemy);
-            yield return new WaitForSeconds(1f / wave.rate);
 
-            gui.SetWaveCompletedVisible(false);
+            if (gameState != GameState.GameOver)
+            {
+                SpawnEnemy(wave.enemy);
+                yield return new WaitForSeconds(1f / wave.rate);
+            }
+            else
+            {
+                state = SpawnState.COUNTING;
+                yield break;
+            }
         }
 
         state = SpawnState.WAITING;
-
 
         yield break;
     }
@@ -147,6 +208,27 @@ public class GameController : MonoBehaviour
         }
     }
 
+
+    private void RemoveAllEnemies()
+    {
+        var enemies = GameObject.FindGameObjectsWithTag(Tags.ENEMY);
+
+        for (var i = 0; i < enemies.Length; i++)
+        {
+            Destroy(enemies[i]);
+        }
+    }
+
+    private void RemoveAllMissiles()
+    {
+        var enemies = GameObject.FindGameObjectsWithTag(Tags.MISSILE);
+
+        for (var i = 0; i < enemies.Length; i++)
+        {
+            Destroy(enemies[i]);
+        }
+    }
+
     void WaveCompleted()
     {
         gui.SetWaveStatusText("WAVE COMPLETED");
@@ -166,9 +248,28 @@ public class GameController : MonoBehaviour
             waveMultipler++;
         }
 
-        AIController.minVelocity += 50;
-        AIController.maxVelocity += 50;
-
+        IncreaseDifficulty();
+        //IncreasePlayerStats();
+       
     }
+
+    private void IncreaseDifficulty()
+    {
+        AIController.minVelocity += 150 / waveMultipler;
+        AIController.maxVelocity += 150 / waveMultipler;
+    }
+
+    private void IncreasePlayerStats()
+    {
+        PlayerController pc = player.GetComponent<PlayerController>();
+        pc.IncreaseVelocity(50.0f);
+        pc.DecreaseTimeBetweenAttacks(0.35f);
+    }
+
+    public int WaveMultipler()
+    {
+        return waveMultipler;
+    }
+
 }
 
