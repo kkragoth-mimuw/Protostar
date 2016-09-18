@@ -13,6 +13,7 @@ public class Tags : MonoBehaviour
     public static string SPAWNER = "Spawner";
     public static string PLAYER_SPAWN = "PlayerSpawn";
     public static string MISSILE = "Missile";
+    public static string MAIN_CAMERA = "MainCamera";
 
     public static string MX = "Mouse X";
     public static string MY = "Mouse Y";

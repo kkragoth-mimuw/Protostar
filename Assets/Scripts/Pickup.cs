@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+// TODO: create pickup class
 public class Pickup : MonoBehaviour
 {
 

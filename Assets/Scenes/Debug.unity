@@ -2052,7 +2052,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: WAVESHOOTER
+  m_Text: PROTOSTAR
 --- !u!222 &1027325218
 CanvasRenderer:
   m_ObjectHideFlags: 0

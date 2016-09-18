@@ -11,6 +11,9 @@ public class PlayerController : MonoBehaviour
     private static float maxTimeBetweenAttacks = 0.5f;
     private static float minTimeBetweenAttacks = 0.03f;
 
+    private const float startVelocity = 250.0f;
+    private const float velocityMultiplier = 50.0f;
+
     private GameObject player;
     private GameController gc;
 
@@ -27,16 +30,14 @@ public class PlayerController : MonoBehaviour
         if (timeBetweenAttacks <= minTimeBetweenAttacks)
             timeBetweenAttacks = minTimeBetweenAttacks;
     }
-
-    // Use this for initialization
+        
     void Start()
     {
         player = GameObject.FindGameObjectWithTag(Tags.PLAYER);
-        GameObject.FindGameObjectWithTag("MainCamera").GetComponent<UnityStandardAssets._2D.Camera2DFollow>()
-            .target = player.GetComponentsInChildren<Transform>()[1];
+        makeCameraFollow();
     
         timeBetweenAttacks = maxTimeBetweenAttacks;
-        velocity = 250.0f;
+        velocity = startVelocity;
 
         gc = GameObject.FindGameObjectWithTag(Tags.GAME_CONTROLLER).GetComponent<GameController>();
     }
@@ -48,7 +49,7 @@ public class PlayerController : MonoBehaviour
 
     public void Move(Vector3 m)
     {
-        velocity = 200.0f + 25.0f * gc.WaveMultipler();
+        velocity = startVelocity + velocityMultiplier * gc.WaveMultipler();
         player.transform.position += velocity * m * Time.deltaTime; 
     }
 
@@ -73,13 +74,10 @@ public class PlayerController : MonoBehaviour
                     j += 2;
                 }
             }
-
             sinceLastAttack = 0.0f; 
-
         }
     }
 	
-    // Update is called once per frame
     void Update()
     {
         sinceLastAttack += Time.deltaTime;
@@ -88,12 +86,9 @@ public class PlayerController : MonoBehaviour
     public void Die()
     {
         gc.GameOver();
-        GameObject.FindGameObjectWithTag("MainCamera").GetComponent<UnityStandardAssets._2D.Camera2DFollow>()
-            .target = GameObject.FindGameObjectWithTag(Tags.PLAYER_SPAWN).transform;
-        
+        makeCameraUnfollow();
         Destroy(player);
         Destroy(this);
-
     }
 
     void OnTriggerEnter(Collider other)
@@ -102,25 +97,28 @@ public class PlayerController : MonoBehaviour
         {
             this.Die();
         }
-        /*
-        if (other.gameObject.tag == Tags.DEADLY_BORDER)
-        {
-            Debug.Log("SCIANA");
-            this.Die();
-        }
-        */
     }
 
     void OnTriggerExit(Collider other)
     {
         if (other.gameObject.tag == Tags.DEADLY_BORDER)
         {
-            Debug.Log("kapsula");
             this.Die();
         }
-            //this.Die()
     }
 
-    
+    private void makeCameraFollow()
+    {
+        GameObject.FindGameObjectWithTag(Tags.MAIN_CAMERA)
+            .GetComponent<UnityStandardAssets._2D.Camera2DFollow>()
+            .target = player.GetComponentsInChildren<Transform>()[1];
+    }
+
+    private void makeCameraUnfollow()
+    {
+        GameObject.FindGameObjectWithTag(Tags.MAIN_CAMERA)
+            .GetComponent<UnityStandardAssets._2D.Camera2DFollow>()
+            .target = GameObject.FindGameObjectWithTag(Tags.PLAYER_SPAWN).transform;
+    }
 }
 
