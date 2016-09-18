@@ -15,8 +15,8 @@ TODO:
 - Fix spawn bug
 
 Screenshots:
-![Alt text](/Screenshots/prototype/menu.jpg?raw=true "Menu")
-![Alt text](/Screenshots/prototype/gameplay.jpg?raw=true "Gameplay")
-![Alt text](/Screenshots/prototype/gameover.jpg?raw=true "Game Over")
+![Alt text](/Screenshots/prototype/menu.png?raw=true "Menu")
+![Alt text](/Screenshots/prototype/gameplay.png?raw=true "Gameplay")
+![Alt text](/Screenshots/prototype/gameover.png?raw=true "Game Over")
 
 I'm using sounds from freesound.org and free Assets from Unity Store (such as: CNJ Controls)
