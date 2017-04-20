@@ -9,7 +9,7 @@ public class GameController : MonoBehaviour
     public class Wave
     {
         public string name;
-        public Transform enemy;
+        public GameObject enemy;
         public int count;
         public float rate;
     }
@@ -186,10 +186,10 @@ public class GameController : MonoBehaviour
         yield break;
     }
 
-    void SpawnEnemy(Transform _enemy)
+    void SpawnEnemy(GameObject _enemy)
     {
         Transform sp = spawnPoints[Random.Range(0, spawnPoints.Length)].transform;
-        GameObject go = Instantiate(_enemy, sp.position, sp.rotation) as GameObject;
+        GameObject go = Instantiate(_enemy, sp) as GameObject;
     }
 
     bool EnemyIsAlive()

@@ -18,7 +18,7 @@ public class Missile : MonoBehaviour
     public void fire()
     {
         GetComponent<Rigidbody>().AddForce(transform.forward * force, ForceMode.Impulse);
-        sounds[0].Play(); // TODO: fix volume level when firing multiple missiles
+        //sounds[0].Play(); // TODO: fix volume level when firing multiple missiles
     }
 
     public void fire(GameObject owner)
