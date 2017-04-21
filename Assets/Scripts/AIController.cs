@@ -21,13 +21,21 @@ public class AIController : MonoBehaviour
         positionVariation = (int) Random.Range(minPositionVar, maxPoisitionVar);
         velocity = Random.Range(minVelocity, maxVelocity);
     }
+
+    Vector3 getVariationBasedOnPlayerLocation()
+    {
+        var distance = Vector3.Distance(transform.position, player.transform.position);
+        float scalingFactor = distance / 350.0f;
+        scalingFactor *= scalingFactor;
+        return new Vector3(scalingFactor * Random.Range(-positionVariation, positionVariation), 0,
+                scalingFactor * Random.Range(-posVar, posVar));
+    }
 	
     void Update()
     {
         /* Move towards player position with a little offset */
         this.transform.position = Vector3.MoveTowards(transform.position, player.transform.position
-            + new Vector3(Random.Range(-positionVariation, positionVariation), 0,
-                Random.Range(-posVar, posVar)),
+            + getVariationBasedOnPlayerLocation(),
             velocity * Time.deltaTime); 
     }
 
